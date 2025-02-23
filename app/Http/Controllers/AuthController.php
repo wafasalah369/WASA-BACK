@@ -9,28 +9,46 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    public function index()
-    {
-        $users = User::all();
-        return response()->json($users, 200);
-    }
+   
     public function register(Request $request)
-    {
-    
+{
+    try {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',  
+            'password' => 'required|string|min:8',
         ]);
-        
-        $validated['password'] = Hash::make($validated['password']);
-        $user = User::create($validated);
-    
-        return response()->json([  
+
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        $token = $user->createToken('react-auth-token')->plainTextToken;
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'User registered successfully',
             'user' => $user,
-            'token' => $user->createToken('API Token')->plainTextToken,
+            'token' => $token,
         ], 201);
+
+    } catch (ValidationException $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Validation failed',
+            'errors' => $e->errors(),
+        ], 422);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Registration failed',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
     
 
     public function login(Request $request)
@@ -50,29 +68,7 @@ class AuthController extends Controller
         return response()->json(['user' => $user, 'token' => $user->createToken('API Token')->plainTextToken]);
     }
     
-    public function show($id)
-    {
-        $user = User::find($id);
-        if(!$user) {
-            return response()->json(['message' => 'User not found'], 404);
-        }
-        return response()->json($user, 200);
-        
-    }
-    public function update (Request $request, $id)
-    {
-        $user = User::findOrFail($id);
-        $validated = $request->validate([
-           'name' => 'sometimes|string|max:255',
-           'email' => 'sometimes|email|unique:users,email, .$user->id',
-         
-        ]);
-        $user->update($validated);
 
-        return response()->json([
-             'message' => 'User updated successfully',
-             'user' => $user], 200);
-    }
     public function logout(Request $request)
     {
         $request->user()->tokens()->delete();

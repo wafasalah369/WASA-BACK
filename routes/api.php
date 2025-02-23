@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -19,7 +20,10 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']); 
-Route::get('/users', [AuthController::class, 'index']);
-Route::get('/users/{id}', [AuthController::class, 'show']);
-Route::put('/users/{id}', [AuthController::class, 'update']);
+/*User APIs  **/
+Route::apiResource('users', UserController::class);
+//Route::middleware('auth:sanctum')->get('/users/{id}', [AuthController::class, 'show']);
+Route::middleware('api')->group(function () {
+    Route::apiResource('users', UserController::class);
+});
    
