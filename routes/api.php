@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -26,4 +28,8 @@ Route::apiResource('users', UserController::class);
 Route::middleware('api')->group(function () {
     Route::apiResource('users', UserController::class);
 });
+/* Products APIs **/
+Route::apiResource('products', ProductController::class);
+/* Categories APIs **/
+Route::apiResource('categories', CategoryController::class);
    
